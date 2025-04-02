@@ -1,0 +1,16 @@
+name: Debug Docker Login
+
+on:
+  workflow_dispatch:  # Allows you to run this manually from GitHub Actions UI
+
+jobs:
+  test-docker-login:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Debug Docker Login
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
