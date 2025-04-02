@@ -1,14 +1,14 @@
-name: Basic CI/CD
+name: Basic CI/CD with Docker
 
-on: [push]  # Runs every time you push code
+on: [push]  # Runs on every push
 
 jobs:
-  test-and-deploy:
+  test-build-deploy:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout Repository
-      uses: actions/checkout@v3  # Gets the latest code
+      uses: actions/checkout@v3  # Gets latest code
 
     - name: Set Up Python
       uses: actions/setup-python@v3
@@ -23,6 +23,17 @@ jobs:
       run: |
         pytest test_app.py
 
-    - name: Deploy (Mock)
+    - name: Build Docker Image
       run: |
-        echo "Deployment successful! 🚀"
+        docker build -t cicd-project:${{ github.sha }} .
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+    - name: Push Docker Image to Docker Hub
+      run: |
+        docker tag cicd-project:${{ github.sha }} ${{ secrets.DOCKERHUB_USERNAME }}/cicd-project:latest
+        docker push ${{ secrets.DOCKERHUB_USERNAME }}/cicd-project:latest
